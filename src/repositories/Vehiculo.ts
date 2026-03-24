@@ -1,68 +1,43 @@
+import { db } from "../config/db.config"; 
+import { 
+  RowDataPacket, // Para resultados de seleccion 
+  ResultSetHeader // Para resultados de inserción, actualización, eliminación
+} from "mysql2";
+import YamlConvertJson from "./YamlConvertJson";
 import type { Vehiculo } from "../models/vehiculo";
-// DEPENDENCIAS PARA LEER ARCHIVOS yaml
-import * as yaml from 'js-yaml';
-import * as fs from 'fs';
-import path from 'path';
+import { USEMOCKDATA } from "../config/db.config";
 
-export default class VehiculoRepository {
+export default class VehiculoRepository extends YamlConvertJson {
+
   async select(): Promise<Vehiculo[]> {
-    try {
-      const filePath = path.resolve(
-        process.cwd(),
-        'postman',
-        'collections',
-        'CHETS NUTS FOODS',
-        'MOCK SERVER - EXAMPLE',
-        'vehículos',
-        '.resources',
-        'listar vehiculos.resources',
-        'examples',
-        'ok - listar vehiculos.example.yaml'
-      );
-
-      const fileContents = fs.readFileSync(filePath, 'utf8');
-      const yamlData = yaml.load(fileContents) as {
-        response?: {
-          body?: {
-            content?: unknown;
-          };
-        };
-      };
-
-      const content = yamlData?.response?.body?.content;
-
-      if (typeof content !== 'string') {
-        throw new Error('No se encontro response.body.content como texto en el YAML.');
-      }
-
-      const parsedBody = JSON.parse(content) as {
-        data?: Array<{
-          idvehempresa?: number;
-          placa?: string;
-          marca?: string;
-          modelo?: string;
-          anio?: number;
-          tipoVehiculo?: string;
-          capacidadCarga?: number;
-        }>;
-      };
-
-      const vehiculos = Array.isArray(parsedBody.data)
-        ? parsedBody.data.map((item): Vehiculo => ({
-            id: item.idvehempresa ?? 0,
-            placa: item.placa ?? '',
-            marca: item.marca ?? '',
-            modelo: item.modelo ?? '',
-            anioFabricacion: item.anio ?? 0,
-            tipoVehiculo: item.tipoVehiculo ?? '',
-            capacidadCarga: item.capacidadCarga ?? 0,
-          }))
-        : [];
-
-      return vehiculos;
-    } catch (e) {
-      console.error("Error leyendo el archivo YAML:", e);
-      return [];
+    if (!USEMOCKDATA) {
+      const query = `SELECT * FROM vehiculo`;
+      const [rows] = await db.query<RowDataPacket[]>(query);
+      return (rows.length === 0 ? null : rows) as Vehiculo[];
+    } else {
+      return this.convert<Vehiculo[]> (
+        [
+          'postman',
+          'collections',
+          'CHETS NUTS FOODS',
+          'MOCK SERVER - EXAMPLE',
+          'vehículos',
+          '.resources',
+          'listar vehiculos.resources',
+          'examples',
+          'ok - listar vehiculos.example.yaml'
+        ], (body: any): Vehiculo[] => {
+        if (!Array.isArray(body?.data)) return [];
+        return body.data.map((item: any) => ({
+          id: item.idvehempresa ?? 0,
+          placa: item.placa ?? '',
+          marca: item.marca ?? '',
+          modelo: item.modelo ?? '',
+          anioFabricacion: item.anio ?? 0,
+          tipoVehiculo: item.tipoVehiculo ?? '',
+          capacidadCarga: item.capacidadCarga ?? 0,
+        } as Vehiculo));
+      });
     }
   }
 }
