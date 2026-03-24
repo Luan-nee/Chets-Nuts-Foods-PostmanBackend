@@ -1,64 +1,68 @@
-import { db } from "../config/db.config"; 
 import type { Vehiculo } from "../models/vehiculo";
-import { 
-  RowDataPacket, // Para resultados de seleccion 
-  ResultSetHeader // Para resultados de inserción, actualización, eliminación
-} from "mysql2";
-
-const example: Vehiculo[] = [
-  {
-    id: 1,
-    placa: "ABC-123",
-    marca: "Volvo",
-    modelo: "FH16",
-    anioFabricacion: 2022,
-    tipoVehiculo: "Tractor-remolque",
-    capacidadCarga: 25000
-  },
-  {
-    id: 2,
-    placa: "XYZ-789",
-    marca: "Hyundai",
-    modelo: "H100",
-    anioFabricacion: 2021,
-    tipoVehiculo: "Furgón",
-    capacidadCarga: 1500
-  },
-  {
-    id: 3,
-    placa: "LMN-456",
-    marca: "Mercedes-Benz",
-    modelo: "Actros",
-    anioFabricacion: 2023,
-    tipoVehiculo: "Camión de carga pesada",
-    capacidadCarga: 18000
-  },
-  {
-    id: 4,
-    placa: "PQR-101",
-    marca: "Toyota",
-    modelo: "Hilux",
-    anioFabricacion: 2020,
-    tipoVehiculo: "Camioneta Pickup",
-    capacidadCarga: 1000
-  },
-  {
-    id: 5,
-    placa: "DEF-202",
-    marca: "Scania",
-    modelo: "R450",
-    anioFabricacion: 2019,
-    tipoVehiculo: "Cisterna",
-    capacidadCarga: 30000
-  }
-];
-
+// DEPENDENCIAS PARA LEER ARCHIVOS yaml
+import * as yaml from 'js-yaml';
+import * as fs from 'fs';
+import path from 'path';
 
 export default class VehiculoRepository {
   async select(): Promise<Vehiculo[]> {
-    // const query = `SELECT * FROM vehiculo`;
-    // const [rows] = await db.query<RowDataPacket[]>(query);
-    // return (rows.length === 0 ? null : rows) as Vehiculo[];
-    return example;
+    try {
+      const filePath = path.resolve(
+        process.cwd(),
+        'postman',
+        'collections',
+        'CHETS NUTS FOODS',
+        'MOCK SERVER - EXAMPLE',
+        'vehículos',
+        '.resources',
+        'listar vehiculos.resources',
+        'examples',
+        'ok - listar vehiculos.example.yaml'
+      );
+
+      const fileContents = fs.readFileSync(filePath, 'utf8');
+      const yamlData = yaml.load(fileContents) as {
+        response?: {
+          body?: {
+            content?: unknown;
+          };
+        };
+      };
+
+      const content = yamlData?.response?.body?.content;
+
+      if (typeof content !== 'string') {
+        throw new Error('No se encontro response.body.content como texto en el YAML.');
+      }
+
+      const parsedBody = JSON.parse(content) as {
+        data?: Array<{
+          idvehempresa?: number;
+          placa?: string;
+          marca?: string;
+          modelo?: string;
+          anio?: number;
+          tipoVehiculo?: string;
+          capacidadCarga?: number;
+        }>;
+      };
+
+      const vehiculos = Array.isArray(parsedBody.data)
+        ? parsedBody.data.map((item): Vehiculo => ({
+            id: item.idvehempresa ?? 0,
+            placa: item.placa ?? '',
+            marca: item.marca ?? '',
+            modelo: item.modelo ?? '',
+            anioFabricacion: item.anio ?? 0,
+            tipoVehiculo: item.tipoVehiculo ?? '',
+            capacidadCarga: item.capacidadCarga ?? 0,
+          }))
+        : [];
+
+      return vehiculos;
+    } catch (e) {
+      console.error("Error leyendo el archivo YAML:", e);
+      return [];
+    }
   }
 }

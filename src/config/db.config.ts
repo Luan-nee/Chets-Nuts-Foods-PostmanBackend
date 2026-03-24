@@ -29,3 +29,4 @@ const config = {
 })();
 
 export { connection as db }; 
+export const useMockData: boolean = process.env.USE_MOCK_DATA === 'true';
