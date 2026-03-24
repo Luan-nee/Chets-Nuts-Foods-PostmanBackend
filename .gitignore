@@ -1,3 +1,15 @@
 /node_modules
 /.env
 /.postman
+/postman
+/postman/collections/CHETS NUTS FOODS/.resources
+/postman/collections/CHETS NUTS FOODS/ADMINISTRADOR
+/postman/collections/CHETS NUTS FOODS/CHOFER
+/postman/collections/CHETS NUTS FOODS/TRABAJADOR
+/postman/collections
+/postman/environments
+/postman/flows
+/postman/globals
+/postman/mocks
+/postman/sdks
+/postman/specs
