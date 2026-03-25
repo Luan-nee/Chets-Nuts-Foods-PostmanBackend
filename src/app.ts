@@ -18,7 +18,7 @@ app.use(cors(corsOptions));
 app.use(express.json()); // Permite a Express parsear cuerpos JSON
 
 // Rutas API
-app.use("/api/vehiculos", VehiculoRoutes);
+app.use("/vehiculos", VehiculoRoutes);
 
 // Inicializar el servidor
 app.listen(PORT, () => {
@@ -40,7 +40,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     const responseBody: ApiResponse<any[]> = {
         status: statusCode,
         message: err.message || "Ocurrió un error inesperado en el servidor",
-        info: [] // Como es un error, retornamos el array vacío como pides
+        data: [] // Como es un error, retornamos el array vacío como pides
     };
 
     console.log('❌ Error manejado por el middleware global:', err.message);

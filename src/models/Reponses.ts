@@ -7,7 +7,7 @@
 export interface ApiResponse<T> {
   status: string; // Success, error o warning
   message: string;
-  info: T | null; // Puede ser un objeto, un array de objetos, o null/undefined.
+  data: T | null; // Puede ser un objeto, un array de objetos, o null/undefined.
 }
 
 /**
@@ -29,5 +29,5 @@ export type ApiResponseWithPagination<T> = ApiResponse<T> & {
 export interface ApiErrorResponse {
   status: string; // 'error' o 'warning'
   message: string;
-  // 'info' puede omitirse o ser un objeto de detalles de error.
+  // 'data' puede omitirse o ser un objeto de detalles de error.
 }
