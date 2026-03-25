@@ -6,6 +6,6 @@ const router = Router();
 const vehiculoController = new VehiculoController();
 
 // 1. Rutas específicas PRIMERO
-router.get('/', vehiculoController.listar);
+router.get('/', vehiculoController.listar.bind(vehiculoController));
 
 export default router;
